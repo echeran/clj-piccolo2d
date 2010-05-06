@@ -1,0 +1,12 @@
+(ns clj-piccolo2d.examples.hello
+  (:use [clj-piccolo2d.core] :reload-all))
+
+(def n (node))
+(def n2 (node))
+(def l (layer))
+
+(set-bounds! n 0 0 100 80)
+
+(add! n n2)
+
+(set-paint! n :red)
