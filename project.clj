@@ -1,4 +1,4 @@
-(defproject overtone/clj-piccolo2d "0.0.1-SNAPSHOT"
+(defproject clj-piccolo2d "0.0.1-SNAPSHOT"
   :description "Clojure bindings for piccolo2d"
   :dependencies [[org.clojure/clojure "1.1.0"]
                  [org.clojure/clojure-contrib "1.1.0"]
