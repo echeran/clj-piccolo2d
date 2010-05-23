@@ -54,11 +54,17 @@
 (defmulti set-bounds! (fn [node x y w h] (type node)))
 (defmethod set-bounds! PNode [node x y w h] (.setBounds node x y w h ))
 
+(derive PNode ::addable)
+(derive PPath ::addable)
+
 ;; Add!
 (defmulti add! (fn [parent child] [(type parent) (type child)]))
-(defmethod add! [PLayer PNode] [layer node] (.addChild layer node))
-(defmethod add! [PNode PNode] [parent child] (.addChild parent child))
-(defmethod add! [PCanvas PNode] [parent child] (.addChild (.getLayer parent) child ))
+(defmethod add! [PLayer ::addable] [layer node] (.addChild layer node))
+(defmethod add! [PNode ::addable] [parent child] (.addChild parent child))
+(defmethod add! [PCanvas ::addable] [parent child] (.addChild (.getLayer parent) child ))
+
+(defmulti clear! (fn [node] (type node)))
+(defmethod clear! PCanvas [canvas] (.removeAllChildren (.getLayer canvas)))
 
 (defn node [] (PNode.))
 (defn layer [] (PLayer.))
@@ -80,6 +86,13 @@
 
 (defmulti rotate (fn [theta node] (type node)))
 (defmethod rotate PNode [theta node] (doto (PNode.) (rotate! theta) (add! node)))
+
+(defmulti height type)
+(defmethod height PDimension [dimension] (.getHeight dimension))
+(defmethod height PNode [node] (.getHeight node))
+
+(defmulti y-offset type)
+(defmethod y-offset PNode [node] (.getYOffset node))
 
 (defn canvas [] (PCanvas.))
 (defn text
@@ -165,6 +178,20 @@
 (defmethod set-stroke-paint! [PPath ::number ::number ::number ::number] [node r g b a] (.setStrokePaint node (color r g b a)))
 
 
+(defmulti set-text-paint! (fn [node & args] [(type node)
+                                        (type (nth args 0 nil))
+                                        (type (nth args 1 nil))
+                                        (type (nth args 2 nil))
+                                        (type (nth args 3 nil))]))
+
+(defmethod set-text-paint! [PText ::color nil nil nil] [node color] (.setTextPaint node color))
+(defmethod set-text-paint! [PText ::keyword nil nil nil] [node key] (.setTextPaint node (color-map key)))
+(defmethod set-text-paint! [PText ::number ::number ::number nil] [node r g b] (.setTextPaint node (color r g b)))
+(defmethod set-text-paint! [PText ::number ::number ::number ::number] [node r g b a] (.setTextPaint node (color r g b a)))
+
+
+;(defmulti set-text-paint! (fn [node] (type node)))
+;(defmethod set-text-paint! [PText] [node ] (.setTextPaint node paint))
                                         
 ;addInputEventListener
 ;addPropertyChangeListener
@@ -185,5 +212,38 @@
 ; 	mouseReleased(PInputEvent event) 
 ; 	mouseWheelRotated(PInputEvent event) 
 ; 	mouseWheelRotatedByBlock(PInputEvent event) 
+
+(defn picked-node [event] (.getPickedNode event))
+(defn handled! [event] (.setHandled event true))
+(defn delta-relative-to [event node] (.getDeltaRelativeTo event node))
+
+(defmacro on-mouse-pressed [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (mousePressed [~event] ~@body))))
+
+(defmacro on-mouse-dragged [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (mouseDragged [~event] ~@body))))
+
+(defmacro on-mouse-released [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (mouseReleased [~event] ~@body))))
+
+(defmacro on-key-pressed [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (keyPressed [~event] ~@body))))
+
+;(macroexpand-1 '(group (node) (node) (node)))
+
+(defmacro group [ & body ]
+  `(let [retval# (node)]
+     (doall (map (fn [n#] (add! retval# n#)) [~@body])) 
+     retval#))
+
+(defn repaint! [frame] (.repaint frame))
 
 ;;PBoundsHandle.addBoundsHandlesTo(sticky);
