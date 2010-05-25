@@ -50,6 +50,17 @@
 (derive java.lang.Integer ::number)
 (derive clojure.lang.Keyword ::keyword)
 
+(defn picked-node [event] (.getPickedNode event))
+(defn handled! [event] (.setHandled event true))
+(defn delta-relative-to [event node] (.getDeltaRelativeTo event node))
+
+(defmacro group [ & body ]
+  `(let [retval# (node)]
+     (doall (map (fn [n#] (add! retval# n#)) [~@body])) 
+     retval#))
+
+(defn repaint! [frame] (.repaint frame))
+
 ;; Bounds
 (defmulti set-bounds! (fn [node x y w h] (type node)))
 (defmethod set-bounds! PNode [node x y w h] (.setBounds node x y w h ))
@@ -95,9 +106,13 @@
 (defmethod y-offset PNode [node] (.getYOffset node))
 
 (defn canvas [] (PCanvas.))
+
+;; Text
 (defn text
   ([] (PText.))
   ([txt] (PText. txt)))
+
+(defn set-text! [node text] (.setText node text))
 
 (defn ellipse [x y w h] (PPath/createEllipse x y w h))
 (defn rectangle [x y w h] (PPath/createRectangle x y w h))
@@ -115,7 +130,6 @@
 (defn stroke
   ([width] (BasicStroke. width))
   ([width cap join] (BasicStroke. width (stroke-cap-map cap) (stroke-join-map join))))
-
 
 (derive Stroke ::stroke)
 
@@ -189,33 +203,38 @@
 (defmethod set-text-paint! [PText ::number ::number ::number nil] [node r g b] (.setTextPaint node (color r g b)))
 (defmethod set-text-paint! [PText ::number ::number ::number ::number] [node r g b a] (.setTextPaint node (color r g b a)))
 
+                                      
+;; Events
 
-;(defmulti set-text-paint! (fn [node] (type node)))
-;(defmethod set-text-paint! [PText] [node ] (.setTextPaint node paint))
-                                        
-;addInputEventListener
-;addPropertyChangeListener
- ;PInputEventListener
-;processEvent(PInputEvent event, int type) 
-                                        ;          Called whenever an event is emitted.
-; 	keyboardFocusGained(PInputEvent event) 
-; 	keyboardFocusLost(PInputEvent event) 
-; 	keyPressed(PInputEvent event) 
-; 	keyReleased(PInputEvent event) 
-; 	keyTyped(PInputEvent event) 
-; 	mouseClicked(PInputEvent event) 
-; 	mouseDragged(PInputEvent event) 
-; 	mouseEntered(PInputEvent event) 
-; 	mouseExited(PInputEvent event) 
-; 	mouseMoved(PInputEvent event) 
-; 	mousePressed(PInputEvent event) 
-; 	mouseReleased(PInputEvent event) 
-; 	mouseWheelRotated(PInputEvent event) 
-; 	mouseWheelRotatedByBlock(PInputEvent event) 
+(defmacro on-mouse-clicked [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (mouseClicked [~event] ~@body))))
 
-(defn picked-node [event] (.getPickedNode event))
-(defn handled! [event] (.setHandled event true))
-(defn delta-relative-to [event node] (.getDeltaRelativeTo event node))
+(defmacro on-mouse-entered [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (mouseEntered [~event] ~@body))))
+
+(defmacro on-mouse-exited [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (mouseExited [~event] ~@body))))
+
+(defmacro on-mouse-moved [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (mouseMoved [~event] ~@body))))
+
+(defmacro on-mouse-wheel-rotated [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (mouseWheelRotated [~event] ~@body))))
+
+(defmacro on-mouse-wheel-rotated-by-block [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (mouseWheelRotatedByBlock [~event] ~@body))))
 
 (defmacro on-mouse-pressed [component event & body]
   `(. ~component addInputEventListener
@@ -232,18 +251,23 @@
       (proxy [PBasicInputEventHandler] []
         (mouseReleased [~event] ~@body))))
 
+(defmacro on-keyboard-focus-gained [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (keyboardFocusGained [~event] ~@body))))
+
+(defmacro on-keyboard-focus-lost [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (keyboardFocusLost [~event] ~@body))))
+
+(defmacro on-key-typed [component event & body]
+  `(. ~component addInputEventListener
+      (proxy [PBasicInputEventHandler] []
+        (keyTyped [~event] ~@body))))
+
 (defmacro on-key-pressed [component event & body]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
         (keyPressed [~event] ~@body))))
 
-;(macroexpand-1 '(group (node) (node) (node)))
-
-(defmacro group [ & body ]
-  `(let [retval# (node)]
-     (doall (map (fn [n#] (add! retval# n#)) [~@body])) 
-     retval#))
-
-(defn repaint! [frame] (.repaint frame))
-
-;;PBoundsHandle.addBoundsHandlesTo(sticky);
