@@ -3,6 +3,5 @@
   :dependencies [[org.clojure/clojure "1.2.0-master-SNAPSHOT"]
                  [org.clojure/clojure-contrib "1.2.0-SNAPSHOT"]
                  [org.piccolo2d/piccolo2d-core "1.3"]
-                 [overtone "0.1.1"]
                  ]
   :dev-dependencies [[leiningen/lein-swank "1.2.0-SNAPSHOT"]])
