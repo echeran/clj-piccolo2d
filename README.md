@@ -12,4 +12,4 @@ FIXME: write
 
 ## License
 
-FIXME: write
+Same as piccolo2d, http://www.opensource.org/licenses/bsd-license.php
