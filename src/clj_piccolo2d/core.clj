@@ -42,44 +42,56 @@
                             PPaintContext 
                             PPickPath 
                             PStack 
-                            PUtil)))
+                            PUtil)
+   (edu.umd.cs.piccolox.pswing PSwingCanvas
+                               PSwing))
 
-;; General
+;; general
 (derive java.lang.Float ::number)
 (derive java.lang.Double ::number)
 (derive java.lang.Integer ::number)
 (derive clojure.lang.Keyword ::keyword)
 
+(defn node [] (PNode.))
+(defn layer [] (PLayer.))
+(defn canvas [] (PCanvas.))
+
+;; picking
+
 (defn picked-node [event] (.getPickedNode event))
 (defn handled! [event] (.setHandled event true))
 (defn delta-relative-to [event node] (.getDeltaRelativeTo event node))
 
-(defmacro group [ & body ]
-  `(let [retval# (node)]
-     (doall (map (fn [n#] (add! retval# n#)) [~@body])) 
-     retval#))
+;; swing
 
 (defn repaint! [frame] (.repaint frame))
+(defn swing [canvas component] (PSwing. canvas component))
+(defn swingcanvas [] (PSwingCanvas.))
 
-;; Bounds
+;; bounds
 (defmulti set-bounds! (fn [node x y w h] (type node)))
 (defmethod set-bounds! PNode [node x y w h] (.setBounds node x y w h ))
 
+;; add / remove /clear
 (derive PNode ::addable)
 (derive PPath ::addable)
 
-;; Add!
 (defmulti add! (fn [parent child] [(type parent) (type child)]))
 (defmethod add! [PLayer ::addable] [layer node] (.addChild layer node))
 (defmethod add! [PNode ::addable] [parent child] (.addChild parent child))
 (defmethod add! [PCanvas ::addable] [parent child] (.addChild (.getLayer parent) child ))
 
+(defmulti remove! (fn [parent child] [(type parent) (type child)]))
+(defmethod remove! [PLayer ::addable] [layer node] (.removeChild layer node))
+(defmethod remove! [PNode ::addable] [parent child] (.removeChild parent child))
+(defmethod remove! [PCanvas ::addable] [parent child] (.removeChild (.getLayer parent) child ))
+
 (defmulti clear! (fn [node] (type node)))
+(defmethod clear! PNode [node] (.removeAllChildren node))
+(defmethod clear! PLayer [layer] (.removeAllChildren layer))
 (defmethod clear! PCanvas [canvas] (.removeAllChildren (.getLayer canvas)))
 
-(defn node [] (PNode.))
-(defn layer [] (PLayer.))
-
+;; transformation
 (defmulti translate! (fn [node x y] (type node)))
 (defmethod translate! PNode [node x y] (.translate node x y))
 
@@ -98,22 +110,36 @@
 (defmulti rotate (fn [theta node] (type node)))
 (defmethod rotate PNode [theta node] (doto (PNode.) (rotate! theta) (add! node)))
 
+;; information
+
+(defmulti width type)
+(defmethod width PDimension [dimension] (.getWidth dimension))
+(defmethod width PNode [node] (.getWidth node))
+
 (defmulti height type)
 (defmethod height PDimension [dimension] (.getHeight dimension))
 (defmethod height PNode [node] (.getHeight node))
 
+(defmulti x-offset type)
+(defmethod x-offset PNode [node] (.getXOffset node))
+
 (defmulti y-offset type)
 (defmethod y-offset PNode [node] (.getYOffset node))
 
-(defn canvas [] (PCanvas.))
-
-;; Text
+;; text
 (defn text
   ([] (PText.))
   ([txt] (PText. txt)))
 
 (defn set-text! [node text] (.setText node text))
 
+(defn set-font! [node name style size]
+  (let [st (cond (= style :plain) (Font/PLAIN)
+                 (= style :bold) (Font/BOLD)
+                 (= style :italic) (Font/ITALIC))]
+    (.setFont node (Font. name st (Integer. size)))))
+
+;; shapes
 (defn ellipse [x y w h] (PPath/createEllipse x y w h))
 (defn rectangle [x y w h] (PPath/createRectangle x y w h))
 (defn line [x1 y1 x2 y2] (PPath/createLine x1 y1 x2 y2))
@@ -204,7 +230,7 @@
 (defmethod set-text-paint! [PText ::number ::number ::number ::number] [node r g b a] (.setTextPaint node (color r g b a)))
 
                                       
-;; Events
+;; events
 
 (defmacro on-mouse-clicked [component event & body]
   `(. ~component addInputEventListener
