@@ -44,7 +44,7 @@
                             PStack 
                             PUtil)
    (edu.umd.cs.piccolox.pswing PSwingCanvas
-                               PSwing))
+                               PSwing)))
 
 ;; general
 (derive java.lang.Float ::number)
@@ -86,6 +86,8 @@
 (defmethod remove! [PNode ::addable] [parent child] (.removeChild parent child))
 (defmethod remove! [PCanvas ::addable] [parent child] (.removeChild (.getLayer parent) child ))
 
+;;(defmethod remove! [PNode nil] [node] (.removeChild (.getParent node) node))
+
 (defmulti clear! (fn [node] (type node)))
 (defmethod clear! PNode [node] (.removeAllChildren node))
 (defmethod clear! PLayer [layer] (.removeAllChildren layer))
@@ -95,14 +97,21 @@
 (defmulti translate! (fn [node x y] (type node)))
 (defmethod translate! PNode [node x y] (.translate node x y))
 
+(defmulti translate (fn [x y node] (type node)))
+(defmethod translate PNode [x y node] (doto (PNode.) (translate! x y) (add! node)))
+
+(defmulti atranslate! (fn [node x y] (type node)))
+(defmethod atranslate! PNode [node x y]
+  (.setTransform node nil)
+  (.translate node x y))
+
 (defmulti scale! (fn [node value] (type node)))
 (defmethod scale! PNode [node value] (.scale node value))
 
 (defmulti rotate! (fn [node rotation] (type node)))
 (defmethod rotate! PNode [node rotation] (.rotate node rotation))
 
-(defmulti translate (fn [x y node] (type node)))
-(defmethod translate PNode [x y node] (doto (PNode.) (translate! x y) (add! node)))
+
 
 (defmulti scale (fn [value node] (type node)))
 (defmethod scale PNode [value node] (doto (PNode.) (scale! value) (add! node)))
