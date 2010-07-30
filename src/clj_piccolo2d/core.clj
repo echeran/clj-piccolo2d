@@ -112,7 +112,6 @@
 (defmethod rotate! PNode [node rotation] (.rotate node rotation))
 
 
-
 (defmulti scale (fn [value node] (type node)))
 (defmethod scale PNode [value node] (doto (PNode.) (scale! value) (add! node)))
 
@@ -241,68 +240,67 @@
                                       
 ;; events
 
-(defmacro on-mouse-clicked [component event & body]
+(defmacro on-mouse-clicked [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (mouseClicked [~event] ~@body))))
+        (mouseClicked [event#] (~cb event#)))))
 
-(defmacro on-mouse-entered [component event & body]
+(defmacro on-mouse-entered [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (mouseEntered [~event] ~@body))))
+        (mouseEntered [event#] (~cb event#)))))
 
-(defmacro on-mouse-exited [component event & body]
+(defmacro on-mouse-exited [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (mouseExited [~event] ~@body))))
+        (mouseExited [event#] (~cb event#)))))
 
-(defmacro on-mouse-moved [component event & body]
+(defmacro on-mouse-moved [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (mouseMoved [~event] ~@body))))
+        (mouseMoved [event#] (~cb event#)))))
 
-(defmacro on-mouse-wheel-rotated [component event & body]
+(defmacro on-mouse-wheel-rotated [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (mouseWheelRotated [~event] ~@body))))
+        (mouseWheelRotated [event#] (~cb event#)))))
 
-(defmacro on-mouse-wheel-rotated-by-block [component event & body]
+(defmacro on-mouse-wheel-rotated-by-block [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (mouseWheelRotatedByBlock [~event] ~@body))))
+        (mouseWheelRotatedByBlock [event#] (~cb event#)))))
 
-(defmacro on-mouse-pressed [component event & body]
+(defmacro on-mouse-pressed [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (mousePressed [~event] ~@body))))
+        (mousePressed [event#] (~cb event#)))))
 
-(defmacro on-mouse-dragged [component event & body]
+(defmacro on-mouse-dragged [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (mouseDragged [~event] ~@body))))
+        (mouseDragged [event#] (~cb event#)))))
 
-(defmacro on-mouse-released [component event & body]
+(defmacro on-mouse-released [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (mouseReleased [~event] ~@body))))
+        (mouseReleased [event#] (~cb event#)))))
 
-(defmacro on-keyboard-focus-gained [component event & body]
+(defmacro on-keyboard-focus-gained [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (keyboardFocusGained [~event] ~@body))))
+        (keyboardFocusGained [event#] (~cb event#)))))
 
-(defmacro on-keyboard-focus-lost [component event & body]
+(defmacro on-keyboard-focus-lost [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (keyboardFocusLost [~event] ~@body))))
+        (keyboardFocusLost [event#] (~cb event#)))))
 
-(defmacro on-key-typed [component event & body]
+(defmacro on-key-typed [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (keyTyped [~event] ~@body))))
+        (keyTyped [event#] (~cb event#)))))
 
-(defmacro on-key-pressed [component event & body]
+(defmacro on-key-pressed [component cb]
   `(. ~component addInputEventListener
       (proxy [PBasicInputEventHandler] []
-        (keyPressed [~event] ~@body))))
-
+        (keyPressed [event#] (~cb event#)))))
