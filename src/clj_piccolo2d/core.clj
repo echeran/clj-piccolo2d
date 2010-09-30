@@ -72,6 +72,12 @@
 (defmulti set-bounds! (fn [node x y w h] (type node)))
 (defmethod set-bounds! PNode [node x y w h] (.setBounds node x y w h ))
 
+(defmulti set-width! (fn [node w] (type node)))
+(defmethod set-width! PNode [node w] (.setWidth node w))
+
+(defmulti set-height! (fn [node h] (type node)))
+(defmethod set-height! PNode [node h] (.setHeight node h))
+
 ;; add / remove /clear
 (derive PNode ::addable)
 (derive PPath ::addable)
