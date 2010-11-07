@@ -16,32 +16,32 @@
                        PLayer
                        PNode
                        PRoot)
-   (edu.umd.cs.piccolo.activities PActivity 
-                             PActivityScheduler 
-                             PColorActivity 
-                             PInterpolatingActivity 
+   (edu.umd.cs.piccolo.activities PActivity
+                             PActivityScheduler
+                             PColorActivity
+                             PInterpolatingActivity
                              PTransformActivity)
    (edu.umd.cs.piccolo.event PInputEventListener
-                             PBasicInputEventHandler 
-                             PDragEventHandler 
-                             PDragSequenceEventHandler 
-                             PInputEvent 
-                             PInputEventFilter 
-                             PPanEventHandler 
+                             PBasicInputEventHandler
+                             PDragEventHandler
+                             PDragSequenceEventHandler
+                             PInputEvent
+                             PInputEventFilter
+                             PPanEventHandler
                              PZoomEventHandler)
-   (edu.umd.cs.piccolo.nodes PHtmlView 
-                             PImage 
-                             PPath 
+   (edu.umd.cs.piccolo.nodes PHtmlView
+                             PImage
+                             PPath
                              PText)
    (edu.umd.cs.piccolo.util PNodeFilter
-                            PAffineTransform 
-                            PBounds 
-                            PDebug 
-                            PDimension 
-                            PObjectOutputStream 
-                            PPaintContext 
-                            PPickPath 
-                            PStack 
+                            PAffineTransform
+                            PBounds
+                            PDebug
+                            PDimension
+                            PObjectOutputStream
+                            PPaintContext
+                            PPickPath
+                            PStack
                             PUtil)
    (edu.umd.cs.piccolox.pswing PSwingCanvas
                                PSwing)))
@@ -65,18 +65,46 @@
 ;; swing
 
 (defn repaint! [frame] (.repaint frame))
+
 (defn swing [canvas component] (PSwing. canvas component))
+
+(defn swing-no-aa [canvas component]
+  (proxy [PSwing] [canvas component]
+    (paint [context]
+           (doto (.getGraphics context)
+             (.setRenderingHint RenderingHints/KEY_ANTIALIASING RenderingHints/VALUE_ANTIALIAS_OFF)
+             (.setRenderingHint RenderingHints/KEY_TEXT_ANTIALIASING RenderingHints/VALUE_TEXT_ANTIALIAS_OFF)
+             (.setRenderingHint RenderingHints/KEY_RENDERING RenderingHints/VALUE_RENDER_SPEED))
+           (proxy-super paint context))))
+
 (defn swingcanvas [] (PSwingCanvas.))
 
 ;; bounds
 (defmulti set-bounds! (fn [node x y w h] (type node)))
 (defmethod set-bounds! PNode [node x y w h] (.setBounds node x y w h ))
 
+(defmulti set-x! (fn [node x] (type node)))
+(defmethod set-x! PNode [node x] (.setX node x))
+
+(defmulti set-y! (fn [node y] (type node)))
+(defmethod set-y! PNode [node y] (.setY node y))
+
 (defmulti set-width! (fn [node w] (type node)))
 (defmethod set-width! PNode [node w] (.setWidth node w))
 
 (defmulti set-height! (fn [node h] (type node)))
 (defmethod set-height! PNode [node h] (.setHeight node h))
+
+(defmulti set-size! (fn [node w h] (type node)))
+(defmethod set-size! PNode [node w h]
+           (doto node
+             (.setWidth w)
+             (.setHeight h)))
+(defmethod set-size! PSwing [node w h]
+           (doto (.getComponent node)
+             (.setPreferredSize (Dimension. w h))
+             (.setVisible false)            ;; Hack to always resize component
+             (.setVisible true)))
 
 ;; add / remove /clear
 (derive PNode ::addable)
@@ -159,7 +187,7 @@
 (defn line [x1 y1 x2 y2] (PPath/createLine x1 y1 x2 y2))
 
 ;; strokes
-(def stroke-cap-map  {:butt   BasicStroke/CAP_BUTT 
+(def stroke-cap-map  {:butt   BasicStroke/CAP_BUTT
                       :round  BasicStroke/CAP_ROUND
                       :square BasicStroke/CAP_SQUARE})
 
@@ -183,18 +211,18 @@
 (defmethod set-stroke! [PPath ::number ::keyword ::keyword] [node width cap join] (.setStroke node (stroke width cap join)))
 
 ;; paint
-(def color-map {:black      Color/BLACK     
-                :blue       Color/BLUE      
-                :cyan       Color/CYAN      
-                :dark-gray  Color/DARK_GRAY  
-                :gray       Color/GRAY      
-                :green      Color/GREEN     
-                :light-gray Color/LIGHT_GRAY 
-                :magenta    Color/MAGENTA   
-                :orange     Color/ORANGE    
-                :pink       Color/PINK      
-                :red        Color/RED       
-                :white      Color/WHITE     
+(def color-map {:black      Color/BLACK
+                :blue       Color/BLUE
+                :cyan       Color/CYAN
+                :dark-gray  Color/DARK_GRAY
+                :gray       Color/GRAY
+                :green      Color/GREEN
+                :light-gray Color/LIGHT_GRAY
+                :magenta    Color/MAGENTA
+                :orange     Color/ORANGE
+                :pink       Color/PINK
+                :red        Color/RED
+                :white      Color/WHITE
                 :yellow     Color/YELLOW})
 
 (defn color
@@ -243,7 +271,7 @@
 (defmethod set-text-paint! [PText ::number ::number ::number nil] [node r g b] (.setTextPaint node (color r g b)))
 (defmethod set-text-paint! [PText ::number ::number ::number ::number] [node r g b a] (.setTextPaint node (color r g b a)))
 
-                                      
+
 ;; events
 
 (defmacro on-mouse-clicked [component cb]
