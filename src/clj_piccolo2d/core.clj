@@ -275,7 +275,7 @@
 
 (defn on-mouse-clicked [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (mouseClicked [event] (cb event)))))
 
 (defn on-mouse-entered [component cb]
