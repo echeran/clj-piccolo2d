@@ -280,60 +280,60 @@
 
 (defn on-mouse-entered [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (mouseEntered [event] (cb event)))))
 
 (defn on-mouse-exited [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (mouseExited [event] (cb event)))))
 
 (defn on-mouse-moved [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (mouseMoved [event] (cb event)))))
 
 (defn on-mouse-wheel-rotated [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (mouseWheelRotated [event] (cb event)))))
 
 (defn on-mouse-wheel-rotated-by-block [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (mouseWheelRotatedByBlock [event] (cb event)))))
 
 (defn on-mouse-pressed [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (mousePressed [event] (cb event)))))
 
 (defn on-mouse-dragged [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (mouseDragged [event] (cb event)))))
 
 (defn on-mouse-released [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (mouseReleased [event] (cb event)))))
 
 (defn on-keyboard-focus-gained [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (keyboardFocusGained [event] (cb event)))))
 
 (defn on-keyboard-focus-lost [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (keyboardFocusLost [event] (cb event)))))
 
 (defn on-key-typed [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (keyTyped [event] (cb event)))))
 
 (defn on-key-pressed [component cb]
   (.addInputEventListener component
-                          (reify PBasicInputEventHandler
+                          (proxy [PBasicInputEventHandler] []
                             (keyPressed [event] (cb event)))))
